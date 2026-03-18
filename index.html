@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For Shy She Amelia</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+body,html{width:100%;height:100%;background:black;color:white;overflow:hidden;}
+
+.bg{position:fixed;width:100%;height:100%;background:url('bg.jpg') center/cover no-repeat;animation:zoomBg 25s ease-in-out infinite alternate;filter:brightness(0.5);} 
+@keyframes zoomBg{from{transform:scale(1);}to{transform:scale(1.1);}}
+
+#particles{position:fixed;width:100%;height:100%;pointer-events:none;}
+.particle{position:absolute;width:3px;height:3px;background:white;opacity:0.3;border-radius:50%;animation:float linear infinite;}
+@keyframes float{from{transform:translateY(100vh);}to{transform:translateY(-10vh);}}
+
+#startScreen,#choiceBox{position:fixed;width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;background:black;z-index:9999;}
+#choiceBox{display:none;}
+
+button{padding:10px 20px;border:none;border-radius:20px;cursor:pointer;margin-top:10px;}
+
+#sceneText{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:90%;max-width:700px;text-align:center;line-height:1.8;}
+
+#chatScene{position:fixed;bottom:0;width:100%;height:100%;display:none;flex-direction:column;justify-content:flex-end;padding:15px;overflow-y:auto;}
+.bubble{max-width:75%;padding:10px;border-radius:15px;margin:5px;opacity:0;transform:translateY(20px);animation:fadeUp .4s forwards;}
+.me{background:#075e54;margin-left:auto;}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0);}}
+.typing{font-size:12px;opacity:.6;margin:5px;}
+
+.shake{animation:shake .3s;}
+@keyframes shake{0%{transform:translate(-50%,-50%) translateX(0);}25%{transform:translate(-50%,-50%) translateX(-5px);}50%{transform:translate(-50%,-50%) translateX(5px);}75%{transform:translate(-50%,-50%) translateX(-5px);}100%{transform:translate(-50%,-50%) translateX(0);}}
+</style>
+</head>
+
+<body>
+<div class="bg"></div>
+<div id="particles"></div>
+
+<div id="startScreen">
+  <button id="startBtn">buka pelan-pelan...</button>
+</div>
+
+<div id="choiceBox">
+  <p>kamu yakin mau baca ini?</p>
+  <button id="yesBtn">iya</button>
+  <button id="noBtn">gak</button>
+</div>
+
+<div id="sceneText"></div>
+<div id="chatScene"></div>
+
+<audio id="music" loop>
+  <source src="music.mp3">
+</audio>
+
+<script>
+/* PARTICLES */
+setInterval(()=>{
+  let p=document.createElement("div");
+  p.className="particle";
+  p.style.left=Math.random()*100+"%";
+  p.style.animationDuration=(Math.random()*10+10)+"s";
+  document.getElementById("particles").appendChild(p);
+  setTimeout(()=>p.remove(),15000);
+},300);
+
+let music=document.getElementById("music");
+
+function fadeMusic(target,duration){
+  let step=(target-music.volume)/(duration/100);
+  let i=setInterval(()=>{
+    music.volume+=step;
+    if(Math.abs(music.volume-target)<0.01){music.volume=target;clearInterval(i);} 
+  },100);
+}
+
+function typeText(el,text,i,cb){
+  if(i<text.length){el.innerHTML+=text[i];setTimeout(()=>typeText(el,text,i+1,cb),30);} 
+  else cb&&cb();
+}
+
+/* FLOW */
+document.getElementById("startBtn").onclick=()=>{
+  document.getElementById("startScreen").style.display="none";
+  document.getElementById("choiceBox").style.display="flex";
+};
+
+/* NO BUTTON RUN */
+let noBtn=document.getElementById("noBtn");
+noBtn.addEventListener("mouseover",()=>{
+  noBtn.style.position="absolute";
+  noBtn.style.left=Math.random()*80+"%";
+  noBtn.style.top=Math.random()*80+"%";
+});
+
+/* YES */
+document.getElementById("yesBtn").onclick=()=>{
+  document.getElementById("choiceBox").style.display="none";
+  music.play().catch(()=>{});
+  fadeMusic(0.4,2000);
+  showMain(0);
+};
+
+/* STORY */
+const main=[
+"aku harap kita asing untuk saling memperbaiki diri...",
+"jika waktunya tiba aku harap ada kesempatan buat bersama...",
+"aku lelah berkelahi sama isi pikiranku..."
+];
+
+const mid=[
+"kadang aku mikir...",
+"apa semua ini cuma sepihak?",
+"aku masih nunggu...",
+"sesuatu yang gak pernah kamu janjikan..."
+];
+
+function showMain(i){
+  let el=document.getElementById("sceneText");
+  if(i<main.length){el.innerHTML="";typeText(el,main[i],0,()=>setTimeout(()=>showMain(i+1),2000));}
+  else setTimeout(()=>showMid(0),1500);
+}
+
+function showMid(i){
+  let el=document.getElementById("sceneText");
+  if(i<mid.length){el.innerHTML="";typeText(el,mid[i],0,()=>setTimeout(()=>showMid(i+1),1800));}
+  else setTimeout(startChat,1500);
+}
+
+/* CHAT */
+function startChat(){
+  document.getElementById("sceneText").style.display="none";
+  let chat=document.getElementById("chatScene");
+  chat.style.display="flex";
+
+  function add(msg,delay){
+    setTimeout(()=>{
+      let d=document.createElement("div");
+      d.className="bubble me";
+      d.innerText=msg;
+      chat.appendChild(d);
+      chat.scrollTop=chat.scrollHeight;
+    },delay);
+  }
+
+  add("aku kangen...",1000);
+
+  setTimeout(()=>{
+    let t=document.createElement("div");
+    t.className="typing";
+    t.innerText="Shy She Amelia sedang mengetik...";
+    chat.appendChild(t);
+
+    setTimeout(()=>t.innerText="...",2000);
+    setTimeout(()=>t.remove(),4000);
+  },3000);
+
+  add("aku pamit ya.",6000);
+
+  setTimeout(()=>{
+    let msgs=document.querySelectorAll(".bubble");
+    let i=msgs.length-1;
+    let del=setInterval(()=>{
+      if(i>=0){msgs[i].style.opacity=0;i--;}
+      else clearInterval(del);
+    },800);
+  },9000);
+
+  setTimeout(ending,13000);
+}
+
+/* ENDING */
+function ending(){
+  let el=document.getElementById("sceneText");
+  let chat=document.getElementById("chatScene");
+
+  chat.style.display="none";
+  el.style.display="block";
+
+  const end=[
+"Shy She Amelia...",
+"kamu udah gak di sini lagi...",
+"aku masih di sini...",
+"nunggu sesuatu yang gak akan balik...",
+"...",
+"kamu bahkan gak sadar aku udah pergi..."
+];
+
+  showEnd(0);
+
+  function showEnd(i){
+    if(i>=end.length){fadeMusic(0,4000);return;}
+
+    el.innerHTML="";
+    typeText(el,end[i],0,()=>{
+      if(end[i].includes("gak sadar")){
+        el.classList.add("shake");
+        setTimeout(()=>el.classList.remove("shake"),300);
+      }
+      setTimeout(()=>showEnd(i+1),2500);
+    });
+  }
+}
+</script>
+</body>
+</html>
