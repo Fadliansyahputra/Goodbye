@@ -9,42 +9,84 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
 body,html{width:100%;height:100%;overflow:hidden;background:black;color:white;}
 
+/* BACKGROUND FIX */
 .bg{
-position:fixed;width:100%;height:100%;
+position:fixed;
+width:100%;
+height:100%;
 background:url('bg.jpg') center/cover no-repeat;
 animation:zoom 25s ease-in-out infinite alternate;
 filter:brightness(0.5);
+z-index:0;
+pointer-events:none;
 }
 @keyframes zoom{from{transform:scale(1);}to{transform:scale(1.1);}}
 
-#particles{position:fixed;width:100%;height:100%;pointer-events:none;}
+/* PARTICLE FIX */
+#particles{
+position:fixed;
+width:100%;
+height:100%;
+z-index:1;
+pointer-events:none;
+}
 .particle{
-position:absolute;width:3px;height:3px;background:white;
-opacity:0.3;border-radius:50%;
+position:absolute;
+width:3px;height:3px;
+background:white;
+opacity:0.3;
+border-radius:50%;
 animation:float linear infinite;
 }
-@keyframes float{from{transform:translateY(100vh);}to{transform:translateY(-10vh);}}
+@keyframes float{
+from{transform:translateY(100vh);}
+to{transform:translateY(-10vh);}
+}
 
+/* UI PALING ATAS */
 .screen{
-position:fixed;width:100%;height:100%;
-display:flex;justify-content:center;align-items:center;
-flex-direction:column;text-align:center;padding:20px;
+position:fixed;
+width:100%;
+height:100%;
+display:flex;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+text-align:center;
+padding:20px;
+z-index:10;
 }
 
+/* BUTTON FIX */
 button{
-padding:12px 25px;border:none;border-radius:25px;
-background:white;color:black;cursor:pointer;
+padding:12px 25px;
+border:none;
+border-radius:25px;
+background:white;
+color:black;
+cursor:pointer;
+margin-top:10px;
+position:relative;
+z-index:20;
 }
 
-#choice{display:none;}
+/* TEXT */
 #textBox{
-max-width:700px;line-height:1.8;
+max-width:700px;
+line-height:1.8;
 }
 
+/* CHAT */
 #chat{
-position:fixed;bottom:0;width:100%;height:100%;
-display:none;flex-direction:column;justify-content:flex-end;
+position:fixed;
+bottom:0;
+width:100%;
+height:100%;
+display:none;
+flex-direction:column;
+justify-content:flex-end;
 padding:15px;
+z-index:10;
 }
 
 .bubble{
@@ -60,8 +102,13 @@ animation:fade .4s forwards;
 }
 @keyframes fade{to{opacity:1;transform:translateY(0);}}
 
-.typing{font-size:12px;opacity:0.6;margin:5px;}
+.typing{
+font-size:12px;
+opacity:0.6;
+margin:5px;
+}
 
+/* SHAKE */
 .shake{animation:shake .3s;}
 @keyframes shake{
 0%{transform:translateX(0);}
@@ -82,7 +129,7 @@ animation:fade .4s forwards;
 <button id="startBtn">buka pelan-pelan...</button>
 </div>
 
-<div id="choice" class="screen">
+<div id="choice" class="screen" style="display:none;">
 <p>kamu yakin mau baca ini?</p>
 <button id="yes">iya</button>
 <button id="no">gak</button>
@@ -106,13 +153,13 @@ let p=document.createElement("div");
 p.className="particle";
 p.style.left=Math.random()*100+"%";
 p.style.animationDuration=(Math.random()*10+10)+"s";
-document.getElementById("particles").appendChild(p);
+particles.appendChild(p);
 setTimeout(()=>p.remove(),15000);
 },300);
 
 let music=document.getElementById("music");
 
-/* TEXT EFFECT */
+/* TYPE */
 function type(el,text,i,cb){
 if(i<text.length){
 el.innerHTML+=text[i];
@@ -120,28 +167,29 @@ setTimeout(()=>type(el,text,i+1,cb),30);
 }else cb&&cb();
 }
 
-/* START */
-startBtn.onclick=()=>{
-start.style.display="none";
-choice.style.display="flex";
+/* START FIX */
+document.getElementById("startBtn").onclick=function(){
+document.getElementById("start").style.display="none";
+document.getElementById("choice").style.display="flex";
 };
 
 /* NO BUTTON KABUR */
-no.onmouseover=()=>{
+let no=document.getElementById("no");
+no.addEventListener("mouseover",function(){
 no.style.position="absolute";
 no.style.left=Math.random()*80+"%";
 no.style.top=Math.random()*80+"%";
-};
+});
 
 /* YES */
-yes.onclick=()=>{
-choice.style.display="none";
+document.getElementById("yes").onclick=function(){
+document.getElementById("choice").style.display="none";
 music.play().catch(()=>{});
 music.volume=0.4;
 showMain(0);
 };
 
-/* MAIN TEXT */
+/* MAIN */
 const main=[
 "aku harap kita asing untuk saling memperbaiki diri...",
 "jika waktunya tiba aku harap ada kesempatan buat bersama...",
@@ -149,13 +197,16 @@ const main=[
 ];
 
 function showMain(i){
+let box=document.getElementById("textBox");
 if(i<main.length){
-textBox.innerHTML="";
-type(textBox,main[i],0,()=>setTimeout(()=>showMain(i+1),2000));
+box.innerHTML="";
+type(box,main[i],0,function(){
+setTimeout(()=>showMain(i+1),2000);
+});
 }else setTimeout(showMid,1500);
 }
 
-/* MIDGAME */
+/* MID */
 const mid=[
 "kadang aku mikir...",
 "apa semua ini cuma sepihak?",
@@ -164,15 +215,19 @@ const mid=[
 ];
 
 function showMid(i=0){
+let box=document.getElementById("textBox");
 if(i<mid.length){
-textBox.innerHTML="";
-type(textBox,mid[i],0,()=>setTimeout(()=>showMid(i+1),1800));
+box.innerHTML="";
+type(box,mid[i],0,function(){
+setTimeout(()=>showMid(i+1),1800);
+});
 }else setTimeout(startChat,1500);
 }
 
 /* CHAT */
 function startChat(){
-text.style.display="none";
+document.getElementById("text").style.display="none";
+let chat=document.getElementById("chat");
 chat.style.display="flex";
 
 function add(msg,delay){
@@ -228,8 +283,8 @@ setTimeout(ending,36000);
 
 /* ENDING */
 function ending(){
-chat.style.display="none";
-text.style.display="flex";
+document.getElementById("chat").style.display="none";
+document.getElementById("text").style.display="flex";
 
 const end=[
 "Shy She Amelia...",
@@ -257,6 +312,8 @@ const end=[
 showEnd(0);
 
 function showEnd(i){
+let box=document.getElementById("textBox");
+
 if(i>=end.length){
 music.volume=0;
 setTimeout(()=>{
@@ -266,11 +323,11 @@ document.body.style.background="black";
 return;
 }
 
-textBox.innerHTML="";
-type(textBox,end[i],0,()=>{
+box.innerHTML="";
+type(box,end[i],0,function(){
 if(end[i].includes("itu aku")){
-textBox.classList.add("shake");
-setTimeout(()=>textBox.classList.remove("shake"),300);
+box.classList.add("shake");
+setTimeout(()=>box.classList.remove("shake"),300);
 }
 setTimeout(()=>showEnd(i+1),2500);
 });
